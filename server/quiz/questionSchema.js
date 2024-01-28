@@ -7,23 +7,34 @@ const QuestionSchema = new Schema(
       type: String,
       required: true,
     },
-    optionType:{
+    time:{
       type:String,
       required:true
     },
+    quizType: {
+      type: String,
+      required: true,
+    },
+    optionType:{
+      type:String,
+      required:true
+    }, 
     options: {
       type: [
           {
             text: {type:String},
-            image: {type:String}
+            image: {type:String},
+            count:{type:Number,default:0}
         }
         
       ],
       required: true,
-      _id:false
     },
     answer: {
-      type: String,
+      type: {
+        text: {type:String},
+        image: {type:String}
+    },
       required: true,
     },
     quizId: {type:Schema.Types.ObjectId, ref: "Quiz"},

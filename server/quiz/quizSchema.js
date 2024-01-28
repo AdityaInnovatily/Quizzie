@@ -12,12 +12,16 @@ const QuizSchema = mongoose.Schema(
     },
     timer: {
       type: Number,
-      required: true,
+      // required: true,
     },
     quizType: {
       type: String,
       required: true,
-      description:"either poll or qna"
+      // description:"either poll or qna"
+    },
+    userId:{
+      type:String,
+      required:true
     }
   },
   {
