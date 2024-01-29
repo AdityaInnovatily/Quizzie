@@ -5,11 +5,10 @@ const questionSchema = require("./questionSchema");
 const { default: mongoose } = require('mongoose');
 
 module.exports.createQuiz = async (req, res) => {
-
   
   // console.log("///////////////////////entry//////////////////////",req.body);
-  const { quizName, timer, quizType, questionDetails, userId} = req.body;
-  // console.log(quizName, timer, quizType, questionDetails);
+  const { quizName, time, quizType, questionDetails, userId} = req.body;
+  console.log(quizName, time, quizType, questionDetails);
   // console.log(questionDetails);
   try {
     
@@ -23,7 +22,7 @@ module.exports.createQuiz = async (req, res) => {
     const quizSubmit = await quizSchema.create({
       name: quizName,
       impressions:0,
-      timer:timer,
+      time:time,
       quizType:quizType,
       userId:userId
     });
@@ -32,11 +31,11 @@ module.exports.createQuiz = async (req, res) => {
     for(let quesObj of questionDetails){
 
     const questions = await questionSchema.create({
-      question: quesObj.questionName,
+      question: quesObj.question,
       optionType:quesObj.optionType,
       options: quesObj.options,
       answer:quesObj.answer,
-      time:timer,
+      time:time,
       quizType:quizType,
       quizId: quizSubmit
     });
@@ -57,11 +56,23 @@ module.exports.createQuiz = async (req, res) => {
 // This will get the random questions based on the requested language
 module.exports.getQuestions = async (req, res) => {
  
+  console.log('entery getQuestions');
   try {
 
     let quizObjectId = new mongoose.Types.ObjectId(req.params.quizId);
 // console.log("quizId",quizId);
    
+let data = await quizSchema.updateOne(
+  {
+    _id: quizObjectId,
+  },
+  {
+    $inc: {
+      'impressions': 1,
+    },
+  }
+);
+
     const fetchQuestions = await questionSchema.aggregate([
       {
         $match: {
@@ -70,8 +81,8 @@ module.exports.getQuestions = async (req, res) => {
       },
      
     ]);
-    
-    // console.log("fetchQuestions",fetchQuestions.aggregate());
+
+  
 
     res.status(200).json(fetchQuestions);
   } catch (error) {
@@ -136,5 +147,60 @@ module.exports.deleteQuiz = async(req,res)=>{
 
 }
 
+
+module.exports.updateQuiz = async (req, res) => {
+
+  
+  // console.log("///////////////////////entry//////////////////////",req.body);
+  const { quizId, quizName, time, quizType, questionDetails, userId} = req.body;
+  console.log("quizIdqqqqqqqqw",req.body)
+
+  try {
+    
+  let quizObjectId = new mongoose.Types.ObjectId(quizId);
+   
+  
+    const quizSubmit = await quizSchema.updateOne(
+      { _id: quizObjectId }, 
+      {
+        $set: 
+          {
+            name: quizName,
+            time:time,
+            quizType:quizType,
+            userId:userId
+          }
+      },
+    );
+
+    await questionSchema.deleteMany({quizId: quizObjectId});
+
+    console.log("question deleted");
+
+    for(let quesObj of questionDetails){
+
+    const question = await questionSchema.create(
+     {
+      question: quesObj.question,
+      optionType:quesObj.optionType,
+      options: quesObj.options,
+      answer:quesObj.answer,
+      time:time,
+      quizType:quizType,
+      quizId: quizObjectId
+    });
+
+   
+    
+  }
+
+
+  // console.log("question",question);
+    res.status(200).send(quizSubmit);
+  } catch (error) {
+    res.status(500).send({ "error message": error });
+  }
+
+}
 
 

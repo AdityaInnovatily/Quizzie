@@ -10,9 +10,9 @@ const QuizSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    timer: {
-      type: Number,
-      // required: true,
+    time: {
+      type: String,
+      required: true,
     },
     quizType: {
       type: String,
