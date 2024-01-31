@@ -62,16 +62,6 @@ module.exports.getQuestions = async (req, res) => {
     let quizObjectId = new mongoose.Types.ObjectId(req.params.quizId);
 // console.log("quizId",quizId);
    
-let data = await quizSchema.updateOne(
-  {
-    _id: quizObjectId,
-  },
-  {
-    $inc: {
-      'impressions': 1,
-    },
-  }
-);
 
     const fetchQuestions = await questionSchema.aggregate([
       {
@@ -202,5 +192,43 @@ module.exports.updateQuiz = async (req, res) => {
   }
 
 }
+
+
+module.exports.getQuestionsWithImpressions = async (req, res) => {
+ 
+  console.log('entery getQuestionsWithImpressions');
+  try {
+
+    let quizObjectId = new mongoose.Types.ObjectId(req.params.quizId);
+// console.log("quizId",quizId);
+   
+let data = await quizSchema.updateOne(
+  {
+    _id: quizObjectId,
+  },
+  {
+    $inc: {
+      'impressions': 1,
+    },
+  }
+);
+
+    const fetchQuestions = await questionSchema.aggregate([
+      {
+        $match: {
+          quizId: quizObjectId,
+        },
+      },
+     
+    ]);
+
+  
+
+    res.status(200).json(fetchQuestions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
 
